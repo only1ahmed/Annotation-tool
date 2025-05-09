@@ -10,6 +10,11 @@ import { defaultKeymap } from "@codemirror/commands";
 import { auth } from "../config/firebase";
 import { redirect } from "react-router";
 import "./home.css";
+import { db } from "../config/firebase"; // Ensure Firestore is initialized in your firebase config
+import { collection, addDoc } from "firebase/firestore";
+
+
+
 export function meta({ }: Route.MetaArgs) {
   return [
     { title: "New React Router App" },
@@ -57,16 +62,7 @@ export default function Home() {
     }
 
   };
-  const handleAnnotationSubmit = () => {
-    // Logic for handling annotation submission
-    alert('Annotation submitted successfully!');
-    console.log('Annotation data submitted.');
-    // Access the JSON data
-    console.log('Submitting annotation with the following data:', sampleData);
 
-    // Example: Display the JSON data in an alert (optional)
-    alert(`Annotation submitted with the following data:\n${JSON.stringify(sampleData, null, 2)}`);
-  };
   const sampleData = {
     url: "https://example.com/article/123",
     content: {
@@ -106,10 +102,10 @@ export default function Home() {
       overflow: "auto",
     }
   })
+  let jsonEditor: EditorView | null = null; // Declare the editor instance globally
 
   useEffect(() => {
     // Initialize CodeMirror JSON editor
-    let jsonEditor = null;
     if (typeof window !== 'undefined') {
       jsonEditor = new EditorView({
         parent: document.getElementById("json-editor")!,
@@ -124,17 +120,45 @@ export default function Home() {
       });
     }
   }, []);
-  // const jsonEditor = new EditorView({
-  //   parent: document.getElementById("json-editor")!,
-  //   state: EditorState.create({
-  //     doc: JSON.stringify(sampleData, null, 2),
-  //     extensions: [
-  //       basicSetup,
-  //       json(),
-  //       keymap.of(defaultKeymap)
-  //     ]
-  //   })
-  // });
+
+  const handleAnnotationSubmit = async () => {
+    try {
+      // Retrieve the updated JSON content from the editor
+      const updatedJson = jsonEditor?.state.doc.toString();
+      if (!updatedJson) {
+        alert("No JSON data to submit.");
+        return;
+      }
+
+      // Parse the JSON string to ensure it's valid
+      const parsedData = JSON.parse(updatedJson);
+
+      // Traverse and prepare the JSON for Firestore
+      const prepareForFirestore = (data: any): any => {
+        if (Array.isArray(data)) {
+          return data.map(prepareForFirestore); // Recursively handle arrays
+        } else if (data && typeof data === "object") {
+          const result: any = {};
+          for (const key in data) {
+            result[key] = prepareForFirestore(data[key]); // Recursively handle objects
+          }
+          return result;
+        }
+        return data; // Return primitive values as-is
+      };
+
+      const firestoreData = prepareForFirestore(parsedData);
+
+      // Add the JSON data to the "data" collection in Firestore
+      const docRef = await addDoc(collection(db, "data"), firestoreData);
+      alert("Annotation submitted successfully!");
+      console.log("Annotation data submitted with ID:", docRef.id);
+    } catch (error) {
+      console.error("Error submitting annotation:", error);
+      alert("Failed to submit annotation.");
+    }
+  };
+
   return (
     <>
       <div className="header">
