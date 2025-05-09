@@ -9,6 +9,7 @@ import { keymap } from "@codemirror/view";
 import { defaultKeymap } from "@codemirror/commands";
 import { auth } from "../config/firebase";
 import { redirect } from "react-router";
+import "./home.css";
 export function meta({ }: Route.MetaArgs) {
   return [
     { title: "New React Router App" },
@@ -17,6 +18,14 @@ export function meta({ }: Route.MetaArgs) {
 }
 
 export default function Home() {
+  const signOut = async () => {
+    await auth.signOut();
+    localStorage.removeItem("user");
+    window.location.href = "/"; // Redirect to login page if not logged in
+
+    console.log("User signed out successfully!");
+  };
+
   useEffect(() => {
     // const loggedInUser = !!auth.currentUser;
 
@@ -129,6 +138,9 @@ export default function Home() {
   return (
     <>
       <div className="header">
+        <div className="signOut">
+          <button onClick={signOut}>Sign Out</button>
+        </div>
         <h1>URL Content Annotation Tool</h1>
         {/* <div className="url-input-container">
           <input type="text" id="url-input" placeholder="Enter URL to annotate..." />
