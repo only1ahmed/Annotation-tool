@@ -1,8 +1,5 @@
-# Welcome to React Router!
+# Welcome to annotation tool!
 
-A modern, production-ready template for building full-stack React applications using React Router.
-
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
 
 ## Features
 
@@ -33,6 +30,14 @@ npm run dev
 ```
 
 Your application will be available at `http://localhost:5173`.
+
+##Server-side run
+
+To run the server-side part of the app, you can use this command:
+
+```bash
+npx ts-node-dev src/index.ts
+```
 
 ## Building for Production
 
@@ -84,4 +89,5 @@ This template comes with [Tailwind CSS](https://tailwindcss.com/) already config
 
 ---
 
-Built with ❤️ using React Router.
+
+
