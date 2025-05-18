@@ -2,19 +2,14 @@ const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
 
-// Removed duplicate require statement for 'express'
-// Removed duplicate require statement for 'cors'
 
 const app = express();
 
-// Allow all CORS requests
 app.use(cors());
 
 
-// const app = express();
 const PORT = 5000;
 
-// app.use(cors());
 
 app.get('/proxy', async (req: any, res: any) => {
     try {
@@ -38,7 +33,6 @@ app.get('/proxy', async (req: any, res: any) => {
             }
         });
 
-        // Modify content to make resources load correctly
         let modifiedContent = response.data
             .replace(/<head>/i, `<head>
         <base href="${url}" />
@@ -50,7 +44,6 @@ app.get('/proxy', async (req: any, res: any) => {
         </style>`)
             .replace(/(href="|src=")/gi, `$1${new URL(url).origin}/`);
 
-        // res.send(modifiedContent);
 
         res.send(response.data);
     } catch (error) {
